@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="finra" size="100.000000 56.250000" />
+    <ImageTarget name="intuit" size="100.000000 56.250000" />
+    <ImageTarget name="1and1" size="100.000000 56.250000" />
+    <ImageTarget name="corsair" size="100.000000 56.250000" />
+    <ImageTarget name="datto" size="100.000000 56.250000" />
+    <ImageTarget name="nasdaq" size="100.000000 31.438128" />
+    <ImageTarget name="symantec" size="100.000000 43.215687" />
+    <ImageTarget name="comcast" size="100.000000 56.250000" />
+  </Tracking>
+</QCARConfig>
