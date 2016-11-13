@@ -7,6 +7,8 @@ using System.Net;
 using System.IO;
 using System;
 using System.Timers;
+using System.Security.Cryptography;
+using System.Text;
 
 public class TrackableList : MonoBehaviour
 {
@@ -81,19 +83,19 @@ public class TrackableList : MonoBehaviour
     public Text facebookText;
     public Text oneandoneText;
     public Text nasdaq2Text;
-
+    public Text alteryxText;
+    public Text cocacolaText;
     Dictionary<string, LogoInfo> logoDictionary;
 
     // Use this for initialization
     void Start()
     {
-        updateTimer.Interval = 6000;
+        updateTimer.Interval = 5000;
         updateTimer.Elapsed += OnTimedEvent;
 
         // Have the timer fire repeated events (true is the default)
         updateTimer.AutoReset = true;
         updateTimer.Enabled = true;
-        //GOOGL
         logoDictionary = new Dictionary<string, LogoInfo>();
         logoDictionary.Add("symantec", new LogoInfo("symantec", "SYMC", "Symantec Corp."));        
         logoDictionary.Add("datto", new LogoInfo("datto", "private", "Datto Inc."));
@@ -103,11 +105,12 @@ public class TrackableList : MonoBehaviour
         logoDictionary.Add("comcast", new LogoInfo("comcast", "CMCSA", "Comcast Corp."));
         logoDictionary.Add("finra", new LogoInfo("finra", "private", "Finra Inc."));
         logoDictionary.Add("intuit", new LogoInfo("intuit", "INTU", "Intuit Inc."));
-
         logoDictionary.Add("google", new LogoInfo("google", "GOOGL", "Alphabet Inc."));
         logoDictionary.Add("microsoft", new LogoInfo("microsoft", "MSFT", "Microsoft Inc."));
         logoDictionary.Add("facebook", new LogoInfo("facebook", "FB", "Facebook Inc."));
         logoDictionary.Add("1and1", new LogoInfo("1and1", "private", "1&1 Inc."));
+        logoDictionary.Add("alteryx", new LogoInfo("alteryx", "private", "Alteryx Inc."));
+        logoDictionary.Add("cocacola", new LogoInfo("cocacola", "KO", "The Coca-Cola Co."));
     }
     
     //updates the text of the companies. currently only symantec
@@ -127,13 +130,35 @@ public class TrackableList : MonoBehaviour
         logoDictionary["microsoft"].setData(logoUpdate(logoDictionary["microsoft"].getTicker(), "microsoft", "Microsoft Inc."));
         logoDictionary["facebook"].setData(logoUpdate(logoDictionary["facebook"].getTicker(), "facebook", "Facebook Inc."));
         logoDictionary["1and1"].setData(logoUpdate(logoDictionary["1and1"].getTicker(), "1and1", "1&1 Inc."));
-
-        //  symantecText.text = logoDictionary["symantec"].getData();
-
-        // Debug.Log(ticker + " is the ticker");
-
+        logoDictionary["alteryx"].setData(logoUpdate(logoDictionary["alteryx"].getTicker(), "alteryx", "Alteryx Inc."));
+        logoDictionary["cocacola"].setData(logoUpdate(logoDictionary["cocacola"].getTicker(), "cocacola", "The Coca-Cola Co."));
+        
     }
-    
+
+    public static string DecryptMessage(string text){
+        RijndaelManaged aes = new RijndaelManaged();
+        aes.KeySize = 256;
+        aes.BlockSize = 256;
+        aes.Padding = PaddingMode.Zeros;
+        aes.Mode = CipherMode.CBC;
+
+        aes.Key = Encoding.Default.GetBytes("b6 a0 26 45 97 43 ff 74 27 e9 6e 85 3e cd 18 7c 4c 98 56 12 ff 70 ab 75 25 bd 32 54 90 1a b1 7e");
+
+        text = Encoding.Default.GetString(Convert.FromBase64String(text));
+
+        string IV = text;
+        IV = IV.Substring(IV.IndexOf("-[--IV-[-") + 9);
+        text = text.Replace("-[--IV-[-" + IV, "");
+
+        text = Convert.ToBase64String(Encoding.Default.GetBytes(text));
+        aes.IV = Encoding.Default.GetBytes(IV);
+
+        ICryptoTransform AESDecrypt = aes.CreateDecryptor(aes.Key, aes.IV);
+        byte[] buffer = Convert.FromBase64String(text);
+
+        return Encoding.Default.GetString(AESDecrypt.TransformFinalBlock(buffer, 0, buffer.Length));
+    }
+
     //this function refreshes the data stored in logoDictionary
     private string logoUpdate(string ticker, string name, string real)
     {
@@ -141,12 +166,9 @@ public class TrackableList : MonoBehaviour
         {
             return "private";
         }
-
+        
         //create a helper method and call it with each company name
         WebClient client = new WebClient();
-        // System.Uri myUri = new System.Uri("sa4xs2xa.us-02.live-paas.net/?ticker=" + ticker + "&volume&open&close");
-        //  string reply = client.DownloadString(myUri);
-
         string result = null;
         string url = "http://sa4xs2xa.us-02.live-paas.net/?ticker=" + ticker;
         WebResponse response = null;
@@ -162,8 +184,6 @@ public class TrackableList : MonoBehaviour
         }
         catch (System.Exception ex)
         {
-            // handle error
-            //MessageBox.Show(ex.Message);
             Debug.Log("Youve been hit by the bug of Spo0k. like this error in 5 seconds or...\n" + ex.Message);
 
         }
@@ -174,10 +194,11 @@ public class TrackableList : MonoBehaviour
             if (response != null)
                 response.Close();
         }
-        Debug.Log("Get request: " + result);
-        //split it before return
-
-        /*
+        
+        if (ticker.Equals("KO"))
+        {
+            Debug.Log("Cocacola results is: " + result);
+        }
         String[] splitResults = result.Split(new Char[] { ' ' });
         String color = splitResults[0];
 
@@ -194,10 +215,8 @@ public class TrackableList : MonoBehaviour
         String openString = "Open: " + splitResults[2]+"\n";
         String closeString = "Close: " + splitResults[3]+"\n";
         String volumeString = "Volume: " + splitResults[4] + "\n";
-        */
-        // return percentString + openString + closeString + volumeString;
-
-        return "testing";
+        
+        return percentString + openString + closeString + volumeString;
     }
 
     //refreshes text visible on the screen so that it follows the object
@@ -210,11 +229,7 @@ public class TrackableList : MonoBehaviour
         // currently 'active' trackables 
         //(i.e. the ones currently being tracked by Vuforia)
         IEnumerable<TrackableBehaviour> activeTrackables = sm.GetActiveTrackableBehaviours();
-
-        // Iterate through the list of active trackables
-        //ayy lmao
-        // Debug.Log("List of trackables currently active (tracked): ");
-
+        
         HashSet<String> currentVisible = new HashSet<string>();
         foreach (TrackableBehaviour tb in activeTrackables)
         {
@@ -222,16 +237,6 @@ public class TrackableList : MonoBehaviour
 
             logoDictionary[tb.TrackableName].setVisible(true);
             currentVisible.Add(tb.TrackableName);
-            // if (logoDictionary.ContainsKey(tb.TrackableName))
-            //   {
-
-            //   }
-            Debug.Log("Trackable: " + tb.TrackableName);
-            //currentActive[counter] = tb.TrackableName;
-            //   if (tb.TrackableName.Equals("symantec"))
-            //  {
-            //      symantecDetected = true;
-            //  }
         }
 
 
@@ -272,7 +277,6 @@ public class TrackableList : MonoBehaviour
             comcastText.color = logoDictionary["comcast"].getColor();
 
         }
-        // vitechText.text = getNewText("vitech", currentVisible);
         finraText.text = getNewText("finra", currentVisible);
         if (currentVisible.Contains("finra"))
         {
@@ -309,35 +313,18 @@ public class TrackableList : MonoBehaviour
             oneandoneText.color = logoDictionary["1and1"].getColor();
 
         }
-        //if (currentVisible.Contains("symantec"))
-        //{
-        //    symantecText.text = logoDictionary["symantec"].getData();
-        //}
-        //else
-        //{
-        //    symantecText.text = "";
-        //}
+        alteryxText.text = getNewText("alteryx", currentVisible);
+        if (currentVisible.Contains("alteryx"))
+        {
+            alteryxText.color = logoDictionary["alteryx"].getColor();
 
-        //        if (!logoDictionary["symantec"].isVisible())
-        //       {
-        //          symantecText.text = "";
-        //     }
+        }
+        cocacolaText.text = getNewText("cocacola", currentVisible);
+        if (currentVisible.Contains("cocacola"))
+        {
+            cocacolaText.color = logoDictionary["cocacola"].getColor();
 
-        //   if (symantecDetected)
-        //     {
-        //     symantecText.text = logoDictionary["symantec"].getData();
-
-        //  Debug.Log(ticker + " is the ticker");
-
-        //  Debug.Log(result);
-
-        //response.Close();
-        //    }
-        //     else
-        //     {
-        //          symantecText.text = "";
-        //    }
-
+        }
     }
 
     private string getNewText(String s, HashSet<String> currentVisible)
