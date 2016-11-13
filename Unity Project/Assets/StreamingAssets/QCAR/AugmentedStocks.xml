@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
   <Tracking>
+    <ImageTarget name="nasdaq2" size="100.000000 77.346275" />
+    <ImageTarget name="alteryx" size="100.000000 68.444443" />
+    <ImageTarget name="facebook" size="100.000000 33.978233" />
+    <ImageTarget name="microsoft" size="100.000000 56.250000" />
+    <ImageTarget name="google" size="100.000000 60.000000" />
     <ImageTarget name="finra" size="100.000000 56.250000" />
     <ImageTarget name="intuit" size="100.000000 56.250000" />
     <ImageTarget name="1and1" size="100.000000 56.250000" />
