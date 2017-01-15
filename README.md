@@ -10,7 +10,5 @@ The AugmentedStocks program queries the PHP Script via a GET request on a webser
 <img src="https://github.com/Blackglade/YHacks16-AugmentedStocks/blob/master/Media/3.JPG" style="max-width:40%">
 
 
-[Check Out The Video!](https://github.com/Blackglade/YHacks16-AugmentedStocks/blob/master/Media/video.mp4)
-
 ## License ##
 Released under the [MIT License](https://github.com/Blackglade/YHacks16-AugmentedStocks/blob/master/LICENSE)
